@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
+
+        #chatBox {
+            width: 300px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .user {
+            color: blue;
+        }
+
+        .bot {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>WhatsApp Chatbot</h2>
+
+<div id="chatBox"></div>
+
+<br>
+
+<input type="text" id="message" placeholder="Type message..." />
+<button onclick="sendMessage()">Send</button>
+
+<script>
+function sendMessage() {
+    let msg = document.getElementById("message").value;
+
+    // Show user message
+    let chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML += "<p class='user'>You: " + msg + "</p>";
+
+    fetch('/webhook', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(response => response.json())
+    .then(data => {
+        chatBox.innerHTML += "<p class='bot'>Bot: " + data.reply + "</p>";
+    });
+
+    document.getElementById("message").value = "";
+}
+</script>
+
+</body>
+</html>
