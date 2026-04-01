@@ -1,64 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chatbot</title>
+    <meta charset="UTF-8">
+    <title>WhatsApp Chatbot</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 360px;
+            height: 600px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px;
             text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
         }
 
         #chatBox {
-            width: 300px;
-            margin: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 300px;
+            flex: 1;
+            padding: 15px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          /*  background-image: url('https://i.imgur.com/8bP2T5F.png'); /* subtle WhatsApp-like pattern */
+            background-size: cover;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            word-wrap: break-word;
         }
 
         .user {
-            color: blue;
+            align-self: flex-end;
+            background-color: #dcf8c6;
+            color: black;
+            border-bottom-right-radius: 0;
         }
 
         .bot {
-            color: green;
+            align-self: flex-start;
+            background-color: #ffffff;
+            color: black;
+            border-bottom-left-radius: 0;
+            border: 1px solid #ccc;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background-color: #f0f0f0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .input-area button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            background-color: #075e54;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Scrollbar styling */
+        #chatBox::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chatBox::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
         }
     </style>
 </head>
-
 <body>
 
-<h2>WhatsApp Chatbot</h2>
-
-<div id="chatBox"></div>
-
-<br>
-
-<input type="text" id="message" placeholder="Type message..." />
-<button onclick="sendMessage()">Send</button>
+<div class="chat-container">
+    <div class="header">WhatsApp Chatbot</div>
+    <div id="chatBox"></div>
+    <div class="input-area">
+        <input type="text" id="message" placeholder="Type a message..." />
+        <button onclick="sendMessage()">&#9658;</button>
+    </div>
+</div>
 
 <script>
 function sendMessage() {
-    let msg = document.getElementById("message").value;
+    let msg = document.getElementById("message").value.trim();
+    if (!msg) return;
 
-    // Show user message
     let chatBox = document.getElementById("chatBox");
-    chatBox.innerHTML += "<p class='user'>You: " + msg + "</p>";
 
+    // Add user message
+    let userMsg = document.createElement('div');
+    userMsg.className = 'message user';
+    userMsg.textContent = msg;
+    chatBox.appendChild(userMsg);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+    document.getElementById("message").value = "";
+
+    // Fetch bot reply
     fetch('/webhook', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg })
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-        chatBox.innerHTML += "<p class='bot'>Bot: " + data.reply + "</p>";
+    	//Delay bot reply by 2 second
+    	setTimeout(()=>{
+    		let botMsg = document.createElement('div');
+            botMsg.className = 'message bot';
+            botMsg.textContent = data.reply;
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+    	},1000)
+        
     });
 
-    document.getElementById("message").value = "";
+    
 }
 </script>
 
